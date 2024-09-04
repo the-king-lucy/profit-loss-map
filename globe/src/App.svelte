@@ -51,7 +51,7 @@ let yRotation = spring(0, {stiffness: 0.1, damping: 0.7});
 const degreesPerFrame = 0.5;
 
 const t = timer(() => {
-  if (dragging) return;
+  if (dragging || tooltipData) return;
   $xRotation += degreesPerFrame;
 }, 1);
 
@@ -82,6 +82,18 @@ onMount(() => {
 let tooltipData;
 import Tooltip from "$components/Tooltip.svelte";
 
+import { geoCentroid } from "d3-geo";
+
+  // Whenever tooltipData changes, calculate the center of the country and rotate to it
+  $: if (tooltipData) {
+  const center = geoCentroid(tooltipData);
+  $xRotation = -center[0];
+  $yRotation = -center[1];}
+
+  import {draw} from "svelte/transition";
+
+  import Legend from "$components/Legend.svelte";
+
 </script>
 
 <div class='chart-container' bind:clientWidth={width}>
@@ -98,6 +110,7 @@ import Tooltip from "$components/Tooltip.svelte";
     cy={height / 2} 
     fill="#1c1c1c"
     filter="url(#glow)" 
+    on:click={() => (tooltipData = null)}
   />
   
     <!-- Countries -->
@@ -115,9 +128,24 @@ import Tooltip from "$components/Tooltip.svelte";
     <!-- Borders -->
     <path d={path(borders)} fill="none" stroke="#1C1C1C" />
 
+    {#if tooltipData}
+  {#key tooltipData.id}
+    <path
+      d={path(tooltipData)}
+      fill="transparent"
+      stroke="white"
+      stroke-width="2"
+      pointer-events="none"
+      in:draw
+    />
+  {/key}
+{/if}
+
   </svg>
 
   <Tooltip data={tooltipData} />
+
+  <Legend {colorScale} data={tooltipData} />
 
 </div>
 
@@ -141,6 +169,10 @@ import Tooltip from "$components/Tooltip.svelte";
 
 path:focus {
   outline: none;
+}
+
+path {
+  cursor: pointer;
 }
 
 </style>
