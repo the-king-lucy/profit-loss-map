@@ -1,180 +1,82 @@
 <script>
-import world from "./data/world-110m.json";
-import * as topojson from "topojson-client";
-
-console.log({world})
-
-let countries = topojson.feature(world, world.objects.countries).features;
-let borders = topojson.mesh(world, world.objects.countries, (a, b) => a !== b);
-
-
-import { geoOrthographic, geoPath } from "d3-geo";
-
-let width = 400;
-  $: height = width;
-
-$: projection = geoOrthographic()
-    .scale(width / 2)
-    .rotate([$xRotation, $yRotation, 0])
-    .translate([width / 2, height / 2]);
-
-    $: path = geoPath(projection);
-
-
-    import Glow from "$components/Glow.svelte";
-    import data from "$data/data.json"
-    console.log({data})
-
-    // Restructure countries array to include population
-  countries.forEach((country) => {
-    const metadata = data?.find((d) => d.id === country.id);
-    if (metadata) {
-      country.population = metadata.population;
-      country.country = metadata.country;
-    }
-  });
-
-    // Color scale
-  import { max } from "d3-array";
+  import * as d3 from 'd3';
+  import { json } from "d3";
+  import { geoMercator, geoPath } from "d3-geo";
+  import { onMount } from 'svelte';
+  import * as topojson from "topojson-client";
   import { scaleLinear } from "d3-scale";
+  import { max } from "d3-array";
 
-  const colorScale = scaleLinear()
-    .domain([0, max(data, (d) => d.population)])
-    .range(["#26362e", "#0DCC6C"]);
+const geojsonData = "/data/gccsa.geojson";
 
-    // Auto rotate the globe, 0.5 degrees per second
-  import { timer } from "d3-timer";
-  import {spring} from "svelte/motion"
+let geojsonD;
+let geojson;
+let width, height;
+let aspectRatio;
+let projection;
+let dData = [];
 
-let xRotation = spring(0, {stiffness: 0.08, damping: 0.4});
-let yRotation = spring(0, {stiffness: 0.1, damping: 0.7});
-const degreesPerFrame = 0.5;
+json(geojsonData).then((data) => geojsonD = data);
 
-const t = timer(() => {
-  if (dragging || tooltipData) return;
-  $xRotation += degreesPerFrame;
-}, 1);
+$: console.log(geojsonD);
 
-// Add user interaction
-import { onMount } from "svelte";
-import { select } from "d3-selection";
-import { drag } from "d3-drag";
+d3.csv('/data/domainData.csv').then(function(data) {dData = data; console.log("Domain Data Loaded:", dData);});
 
-let globe;
-let dragging = false;
-const DRAG_SENSITIVITY = 0.5;
 
-onMount(() => {
-  const element = select(globe);
-  element.call(
-    drag()
-      .on("drag", (event) => {
-        dragging = true;
-        $xRotation = $xRotation + event.dx * DRAG_SENSITIVITY;
-        $yRotation = $yRotation - event.dy * DRAG_SENSITIVITY;
-      })
-      .on("end", (event) => {
-        dragging = false;
-      })
-  );
-});
+ $: projection = geoMercator().fitSize([width, height], geojsonD);
+ $: console.log(projection);
+ $: pathGenerator = geoPath(projection);
+ $: console.log(pathGenerator);
 
-let tooltipData;
-import Tooltip from "$components/Tooltip.svelte";
+ let gccsa = [];
+ $: if (geojsonD) gccsa = geojsonD.features.map(feature => { return {feature, path: pathGenerator(feature)}});
 
-import { geoCentroid } from "d3-geo";
+ $: console.log(gccsa);
 
-  // Whenever tooltipData changes, calculate the center of the country and rotate to it
-  $: if (tooltipData) {
-  const center = geoCentroid(tooltipData);
-  $xRotation = -center[0];
-  $yRotation = -center[1];}
+ let hoveredGCCSA = null;
 
-  import {draw} from "svelte/transition";
+ $: console.log(hoveredGCCSA);
 
-  import Legend from "$components/Legend.svelte";
+ const colourScale = scaleLinear()
+ .domain(0, max(dData, (d) => d.value))
+ .range([ "#CCE8FA",
+ "#0F6CC9"])
+
 
 </script>
 
-<div class='chart-container' bind:clientWidth={width}>
+<div class="chart-container" bind:clientWidth={width} bind:clientHeight={height}>
 
-  <svg {width} {height} bind:this={globe} class:dragging>
-
-     <!-- Filter for drop shadow -->
-     <Glow />
-
-    <!-- Globe -->
-    <circle 
-    r={width / 2} 
-    cx={width / 2} 
-    cy={height / 2} 
-    fill="#1c1c1c"
-    filter="url(#glow)" 
-    on:click={() => (tooltipData = null)}
-  />
   
-    <!-- Countries -->
-    {#each countries as country}
+<svg width={width} height={height}>
+
+  {#each gccsa as area}
   <path
-    d={path(country)}
-    fill={colorScale(country.population || 0)}
-    stroke="none"
-    on:click={() => (tooltipData = country)}
-    on:focus={() => (tooltipData = country)}
-    tabIndex="0"
+    d={area.path}
+        stroke={"#8c8c8c"}
+        stroke-linecap={"round"}
+        stroke-linejoin={"round"}
+        class:active={hoveredGCCSA === area.feature.properties.GCC_NAME21}
+        on:mouseenter={() => hoveredGCCSA = area.feature.properties.GCC_NAME21}
   />
 {/each}
-  
-    <!-- Borders -->
-    <path d={path(borders)} fill="none" stroke="#1C1C1C" />
 
-    {#if tooltipData}
-  {#key tooltipData.id}
-    <path
-      d={path(tooltipData)}
-      fill="transparent"
-      stroke="white"
-      stroke-width="2"
-      pointer-events="none"
-      in:draw
-    />
-  {/key}
-{/if}
-
-  </svg>
-
-  <Tooltip data={tooltipData} />
-
-  <Legend {colorScale} data={tooltipData} />
+</svg>
 
 </div>
 
 <style>
-  .chart-container {
-    max-width: 468px;
-    margin: auto;
+
+  div {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
   }
 
-  :global(body) {
-    background-color: rgb(40, 40, 40);
+  path.active {
+fill: #ffffff;
   }
-
-  svg {
-    overflow: visible;
-  }
-
-  .dragging {
-  cursor: grabbing;
-}
-
-path:focus {
-  outline: none;
-}
-
-path {
-  cursor: pointer;
-}
+ 
 
 </style>
-
 
