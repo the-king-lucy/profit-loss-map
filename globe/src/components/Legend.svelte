@@ -40,6 +40,8 @@
   font-size: 0.85rem;
   user-select: none;
   white-space: nowrap; /* Prevents labels from wrapping */
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .line {

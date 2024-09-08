@@ -16,7 +16,10 @@
        <!-- Conditionally render based on gcc_code -->
     {#if dData.GCC_CODE21 === "1GSYD"}
     <div class="chart" >
+      <h2>Greater Sydney</h2>
       <img src="/charts/sydney-profit-loss.svg" alt="Sydney Profit Loss"/>
+      <h3>Percentage of profit-making resales: <span class="blue">96%</span></h3>
+      <h3>Percentage of loss-making resales: <span class="red">4%</span></h3>
     </div>
     
     {/if}
@@ -40,28 +43,16 @@
 
   <style>
 
-.tooltip {
-  position: absolute;
-    background: rgba(var(--background-rgb), 0.7);
-    backdrop-filter: blur(8px);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
-    pointer-events: none;
-    z-index: 100;
-    color: black;
-    border: 2px solid white;
-    transform: translate(-50%, -50%);
-    width: 40%;
-    left: 10%;
-    box-sizing: border-box;
-  }
+.chart {
+  border: 2px;
+  border-color: black;
+}
 
     div {
   position: absolute;
   bottom: 30px;
   right: 0;
-  text-align: right;
+  text-align: left;
 }
 
 h2 {
@@ -69,12 +60,26 @@ h2 {
   font-weight: 700;
   margin-bottom: 0.25rem;
   color: black;
+  padding-top: 2%;
+  padding-bottom: 2%;
 }
 
 h3 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 200;
   color: black;
+  padding-top: 2%;
+  padding-bottom: 2%;
+}
+
+.blue {
+color: #0f6cc9;
+font-weight: 700;
+}
+
+.red {
+  color: #c21616;
+  font-weight: 700;
 }
 
 .chart img {

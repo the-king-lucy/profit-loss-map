@@ -134,8 +134,10 @@ const testMaxValue = d3.max(valueData, d => d.value);
 </script>
 
 <div class="chart-container" bind:clientWidth={width} bind:clientHeight={height}>
+  
   <Legend />
-<svg class="map" viewBox="0 0 {width} {height}" preserveAspectRatio="xMidYMid meet">
+
+<svg class="map" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
 
   <Glow />
 
@@ -158,7 +160,6 @@ const testMaxValue = d3.max(valueData, d => d.value);
 
 
 </svg>
-
 {#if hoveredGCCSA}
     <Tooltip dData={hoveredGCCSA} top={tooltipTop} left={tooltipLeft}  />
   {/if}
@@ -179,6 +180,19 @@ const testMaxValue = d3.max(valueData, d => d.value);
   width: 100vw;
   height: 100vh;
   }
+
+  .map-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.map {
+  width: 100%;
+  height: auto;  /* Automatically adjust height based on width */
+}
 
 
   path {
