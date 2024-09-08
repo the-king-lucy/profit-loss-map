@@ -1,47 +1,45 @@
 <script>
-    export let colorScale;
-    export let data;
+    const minColor = "#ffffff";
+    const maxColor = "#0F6CC9";
 
-    const minColor = colorScale.range()[0];
-    const maxColor = colorScale.range()[1];
-
-    const minValue= colorScale.domain()[0];
-    const maxValue= colorScale.domain()[1];
-
-    import { format } from "d3-format";
-  const suffixFormat = (d) => format(".2~s")(d).replace(/G/, "B")
-  $: percentOfMax = (data?.population / maxValue) * 100;
+    console.log("Hello from Legend")
+ 
 </script>
 
 <div class="legend">
-    <span class="label">{minValue}</span>
-    <div
-  class="bar"
-  style:background="linear-gradient(to right, {colorScale.range()[0]}, {colorScale.range()[1]})"
-/>
-  {#if percentOfMax}
-  <span class="line" style="left: {percentOfMax}%;" />
-  {/if}
+  <span class="label">Less Profitable</span>
+  <div
+    class="bar"
+    style="background: linear-gradient(to right, {minColor}, {maxColor});"
+  ></div>
+  <span class="label">More Profitable</span>
 </div>
 
 <style>
 .bar {
   height: 15px;
   width: 100%;
+  padding-left: 5%;
+  padding-right: 5%;
   position: relative;
 }
 
 .legend {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100vw;
+  margin: 20px;
   flex-direction: row;
   gap: 6px;
   position: relative;
 }
 
 .label {
-  color: white;
+  color: black;
   font-size: 0.85rem;
   user-select: none;
+  white-space: nowrap; /* Prevents labels from wrapping */
 }
 
 .line {
