@@ -42,6 +42,7 @@
   white-space: nowrap; /* Prevents labels from wrapping */
   margin-left: 10px;
   margin-right: 10px;
+  font-weight: 700;
 }
 
 .line {

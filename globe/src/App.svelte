@@ -14,9 +14,8 @@ const geojsonData = "/data/gccsa.geojson";
 const dataUrl = "/data/domainData.json"; 
 
 let geojsonD;
-let geojson;
 let dData = [];
-let width, height; // Set default width and height
+let width, height; 
 let projection, pathGenerator;
 let data = [];
 let gccsa = [];
@@ -42,20 +41,9 @@ const valueData = [
 
 // Set up color scale based on the 'value' column
 let colourScale = scaleLinear()
-.domain([0, testMaxValue]) 
- .range([ "#CCE8FA",
+.domain([80, testMaxValue]) 
+ .range([ "#ffffff",
  "#0F6CC9"]);
-
-// Fetch GeoJSON and CSV data
-//json(geojsonData).then((data) => geojsonD = data);
-//$: console.log(geojsonD);
-
-// d3.csv('/data/domainData.csv').then(function(data) {dData = data; console.log({dData});});
-//d3.csv('/data/domainData.csv').then(function(data) {dData = data; console.log({dData});});
-
-//import dData from "/data/domainData.json";
-
- // Map projection and path generator
 
  // Fetch GeoJSON and JSON data
  onMount(async () => {
@@ -68,49 +56,39 @@ let colourScale = scaleLinear()
 
     console.log("GeoJSON:", geojsonD);
     console.log("Domain Data:", dData);
-
-    dData.forEach(d => {
-  const val = parseFloat(d.value);  // Convert to number if it's a string
-  console.log(`GCC_CODE21: ${d.GCC_CODE21}, Value: ${d.value}, Parsed Value: ${val}, Is NaN: ${isNaN(val)}`);
 });
 
+  $: testMaxValue = d3.max(valueData, d => d.value);
 
+  $: colourScale = scaleLinear()
+.domain([80, testMaxValue]) 
+ .range([ "#ffffff",
+ "#0F6CC9"]);
 
-const testMaxValue = d3.max(valueData, d => d.value);
-  console.log("Test Max Value:", testMaxValue);
+$: if (geojsonD && width && height) {
+    projection = geoMercator()
+    .fitExtent([[10, 10], [width -10, height -10]], geojsonD)
+  }
 
+  $: if (projection) {
+    pathGenerator = geoPath(projection);
+  }
 
- // Update color scale domain after calculating max value
- $: colourScale = scaleLinear()
-      .domain([80, testMaxValue])
-      .range(["#ffffff", "#0F6CC9"]);
-
-      //#CCE8FA", "#0F6CC9"
-    //dData.forEach(d => {
-  //console.log(Object.keys(d));  // Log the keys of each object in dData
-//});
-
-    // Process projection and path only after both GeoJSON and dData are loaded
-    if (geojsonD && dData.length > 0) {
- $: projection = geoMercator().fitSize([width, height], geojsonD)
- .center(d3.geoCentroid(geojsonD))  // Center it based on the geoJSON data
-        .translate([width / 2, height / 2]);  // Center the projection in the SVG;
- $: console.log(projection);
- $: pathGenerator = geoPath(projection);
- $: console.log(pathGenerator);
 
  // Map geojson features with JSON data // on:click={() => {hoveredGCCSA = area.thisD}}
- gccsa = geojsonD.features.map((feature) => {
-        const thisD = dData.find((d) => d.GCC_CODE21 === feature.properties.GCC_CODE21);
-        return {
-          feature,
-          thisD: thisD ? { ...thisD, value: +thisD.value } : null,  // Parse value as a number
-          path: pathGenerator(feature)
-        };
-      });
-      console.log("Mapped GCCSA:", gccsa);
-    }
-  });
+ $: if (geojsonD && dData.length > 0 && pathGenerator) {
+    gccsa = geojsonD.features.map((feature) => {
+      const thisD = dData.find((d) => d.GCC_CODE21 === feature.properties.GCC_CODE21);
+      return {
+        feature,
+        thisD: thisD ? { ...thisD, value: +thisD.value } : null,  // Parse value as a number
+        path: pathGenerator(feature)
+      };
+    });
+  }
+  //});
+
+
 
  $: console.log("Color Scale Domain:", colourScale.domain());
  $: console.log("Color Scale Range:", colourScale.range());
@@ -131,13 +109,15 @@ const testMaxValue = d3.max(valueData, d => d.value);
 
   console.log({Legend})
 
+
+
 </script>
 
 <div class="chart-container" bind:clientWidth={width} bind:clientHeight={height}>
-  
+ 
   <Legend />
 
-<svg class="map" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
+<svg class="map" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
 
   <Glow />
 
@@ -160,6 +140,14 @@ const testMaxValue = d3.max(valueData, d => d.value);
 
 
 </svg>
+<div class="header">
+  <h1>Which area made the most profit on house resales?</h1>
+<h2>Click on your area to find out the average profit or loss on the resale of a house.</h2>
+</div>
+
+<h3 class="footer"><a href="https://www.domain.com.au/research/profit-and-loss-report-1312028/" target="_blank">Profit and Loss Report by Domain Research</a></h3>
+
+
 {#if hoveredGCCSA}
     <Tooltip dData={hoveredGCCSA} top={tooltipTop} left={tooltipLeft}  />
   {/if}
@@ -200,11 +188,29 @@ const testMaxValue = d3.max(valueData, d => d.value);
 }
 
   path.active {
-fill: #ffffff;
-opacity: 0.5;
+fill: black;
   }
 
+h1, h2 {
+  color: black;
+  text-align: left;
+}
 
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 200;
+  margin-bottom: 1rem;
+}
+
+.footer {
+  text-align: left;
+}
  
 
 </style>
