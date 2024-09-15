@@ -3,32 +3,30 @@
     export let top;
   export let left;
 
-    console.log("Hello from tooltip", dData)
-
     import { format } from "d3-format";
   const suffixFormat = (d) => format(".2~s")(d).replace(/G/, "B")
 
   import {fade} from "svelte/transition";
 
-   // Method to adjust tooltip position if it goes off the screen
+ 
    $: adjustedTop = top;
   $: adjustedLeft = left;
 
   $: {
     if (typeof window !== "undefined") {
-      const tooltipWidth = 300; // Adjust if tooltip width changes
-      const tooltipHeight = 150; // Approximate height, adjust as needed
+      const tooltipWidth = 300; 
+      const tooltipHeight = 150; 
 
-      const padding = 10; // Padding from the edge of the screen
+      const padding = 10; 
 
-      // Check horizontal boundaries
+    
       if (left + tooltipWidth > window.innerWidth) {
         adjustedLeft = window.innerWidth - tooltipWidth - padding;
       } else if (left < 0) {
         adjustedLeft = padding;
       }
 
-      // Check vertical boundaries
+     
       if (top + tooltipHeight > window.innerHeight) {
         adjustedTop = window.innerHeight - tooltipHeight - padding;
       } else if (top < 0) {
@@ -40,7 +38,7 @@
   
   {#if dData}
     <div in:fade class="tooltip" style="top: {adjustedTop}px; left: {adjustedLeft}px;">
-       <!-- Conditionally render based on gcc_code -->
+      
 
     {#if dData.GCC_CODE21 === "1GSYD"}
     <div class="chart" >
@@ -356,7 +354,6 @@
   width: 300px;
 }
 
-/* Flexbox for inline layout of h2 and pie chart */
 .header {
   display: flex;
   align-items: center;
@@ -370,12 +367,11 @@ h2 {
 }
 
 .chart img {
-  max-width: 50px; /* Make the pie chart smaller */
+  max-width: 50px; 
   height: auto;
   margin-left: auto;
 }
 
-/* Progress bars for percentage display */
 .progress-bars {
   margin-top: 10px;
 }
@@ -394,11 +390,11 @@ h2 {
 }
 
 .blue-bar {
-  background-color: #0f6cc9; /* Blue for profit */
+  background-color: #0f6cc9; 
 }
 
 .red-bar {
-  background-color: #c21616; /* Red for loss */
+  background-color: #c21616; 
 }
 
 h3 {

@@ -89,17 +89,11 @@ $: if (geojsonD && width && height) {
   //});
 
 
-
- $: console.log("Color Scale Domain:", colourScale.domain());
- $: console.log("Color Scale Range:", colourScale.range());
-
  let hoveredGCCSA;
  let tooltipTop = 0;
   let tooltipLeft = 0;
   let tooltipPosition;
  
-
- $: console.log({hoveredGCCSA});
 
  function handleMouseMove(e, area) {
     hoveredGCCSA = area.thisD;
@@ -107,7 +101,6 @@ $: if (geojsonD && width && height) {
     tooltipLeft = e.clientX + 10;
   }
 
-  console.log({Legend})
 
 
 
