@@ -115,11 +115,18 @@ $: if (geojsonD && width && height) {
 
 <div class="chart-container" bind:clientWidth={width} bind:clientHeight={height}>
  
-  <Legend />
+  <div class="header">
+    <h1>Which area made the most profit on house resales?</h1>
+  <h2>Hover over your area to find out the average profit or loss on the resale of a house.</h2>
+  </div>
+  
+  
 
 <svg class="map" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
 
   <Glow />
+
+  
 
   {#each gccsa as area}
   <!-- svelte-ignore ally-click-events-have-key-events -->
@@ -140,14 +147,10 @@ $: if (geojsonD && width && height) {
 
 
 </svg>
-<div class="header">
-  <h1>Which area made the most profit on house resales?</h1>
-<h2>Click on your area to find out the average profit or loss on the resale of a house.</h2>
-</div>
+<Legend />
 
-<h3 class="footer"><a href="https://www.domain.com.au/research/profit-and-loss-report-1312028/" target="_blank">Profit and Loss Report by Domain Research</a></h3>
-
-
+<h3 class="footer">Source: <a href="https://www.domain.com.au/research/profit-and-loss-report-1312028/" target="_blank">Profit and Loss Report by Domain Research</a></h3>
+  
 {#if hoveredGCCSA}
     <Tooltip dData={hoveredGCCSA} top={tooltipTop} left={tooltipLeft}  />
   {/if}
@@ -163,8 +166,8 @@ $: if (geojsonD && width && height) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   overflow: hidden;
+  align-items: center;
   width: 100vw;
   height: 100vh;
   }
@@ -189,6 +192,7 @@ $: if (geojsonD && width && height) {
 
   path.active {
 fill: black;
+backdrop-filter: blur(8px);
   }
 
 h1, h2 {
@@ -197,12 +201,14 @@ h1, h2 {
 }
 
 h1 {
+  padding-top:0.5rem;
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
 }
 
 h2 {
+  padding-top: 0.1rem;
   font-size: 1.25rem;
   font-weight: 200;
   margin-bottom: 1rem;
@@ -210,6 +216,10 @@ h2 {
 
 .footer {
   text-align: left;
+}
+
+.header .footer {
+  align-self: flex-start
 }
  
 
